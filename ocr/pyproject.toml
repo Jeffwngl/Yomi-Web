@@ -1,0 +1,17 @@
+[project]
+name = "manga-ocr-backend"
+version = "0.1.0"
+description = "Local OCR backend for the Manga OCR browser extension"
+requires-python = ">=3.11,<3.13"
+
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "python-multipart",
+    "pillow",
+    "manga-ocr",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"

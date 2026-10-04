@@ -1,5 +1,9 @@
+from io import BytesIO
+
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from PIL import Image
+from manga_ocr import MangaOcr
 
 app = FastAPI()
 
@@ -10,17 +14,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+mocr = MangaOcr()
+
 @app.post("/ocr")
 async def ocr(image: UploadFile = File(...)):
     data = await image.read()
 
+    pil_image = Image.open(
+        BytesIO(data)
+    )
+
+    text = mocr(pil_image)
+
     print(
-        "received:",
-        image.filename,
-        len(data),
-        "bytes"
+        "OCR result:",
+        text
     )
 
     return {
-        "text": "テストです"
-    }
+        "text": text
+    }   

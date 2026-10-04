@@ -1,4 +1,8 @@
-export async function sendToOCR(blob: Blob) {
+import type { OCRResponse } from "@/lib/types";
+
+export async function sendToOCR(
+    blob: Blob,
+): Promise<OCRResponse> {
     const formData = new FormData();
 
     formData.append(
@@ -9,7 +13,7 @@ export async function sendToOCR(blob: Blob) {
 
     const response = await fetch(
         'http://127.0.0.1:8765/ocr',
-            {
+        {
             method: 'POST',
             body: formData,
         },

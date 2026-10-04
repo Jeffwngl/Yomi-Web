@@ -1,4 +1,4 @@
-import type { Point, Selection } from "@/lib/types";
+import type { Point, Selection, OCRRegion } from "@/lib/types";
 import { sendToOCR } from "@/src/client.ts"
 
 export default defineContentScript({
@@ -33,7 +33,15 @@ export default defineContentScript({
 
                 const result = await sendToOCR(blob);
 
-                console.log('[content] OCR result:', result);
+                console.log(
+                    '[content] detected regions:',
+                    result.regions,
+                );
+
+                showDetectedRegions(
+                    result.regions,
+                    message.selection,
+                );
             }
         });
     },
@@ -54,7 +62,7 @@ function startSelection() {
 
     Object.assign(selectionBox.style, {
         position: 'fixed',
-        border: '2px solid white',
+        border: '1px solid white',
         pointerEvents: 'none',
         display: 'none',
     });
@@ -174,4 +182,45 @@ async function cropScreenshot(
             resolve(blob);
         }, 'image/png');
     });
+}
+
+function showDetectedRegions(
+    regions: OCRRegion[],
+    selection: Selection,
+) {
+    for (const region of regions) {
+        const box = document.createElement('div');
+
+        Object.assign(box.style, {
+            position: 'fixed',
+
+            left: `${
+                selection.x +
+                region.x * selection.width
+            }px`,
+
+            top: `${
+                selection.y +
+                region.y * selection.height
+            }px`,
+
+            width: `${
+                region.width *
+                selection.width
+            }px`,
+
+            height: `${
+                region.height *
+                selection.height
+            }px`,
+
+            border: '2px solid red',
+
+            zIndex: '2147483647',
+
+            pointerEvents: 'none',
+        });
+
+        document.documentElement.appendChild(box);
+    }
 }

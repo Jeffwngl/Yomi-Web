@@ -1,17 +1,6 @@
-import {
-    startSelection,
-    cropScreenshot,
-} from '@/src/selection';
-
-import {
-    showDetectedRegions,
-    showOCRRegions
-} from '@/src/ui';
-
-import {
-    sendToOCR,
-} from '@/src/client';
-
+import { startSelection, cropScreenshot } from '@/src/selection';
+import { showDetectedRegions, showOCRRegions, clearOCRRegions } from '@/src/ui';
+import { sendToOCR } from '@/src/client';
 
 export default defineContentScript({
     matches: ['<all_urls>'],
@@ -19,50 +8,43 @@ export default defineContentScript({
     main() {
         console.log('Extension loaded.');
 
-        browser.runtime.onMessage.addListener(
-            async message => {
-                if (message.type === 'START_SELECTION') {
-                    console.log(
-                        'Selection requested.',
-                    );
+        browser.runtime.onMessage.addListener(async (message) => {
+            if (message.type === 'START_SELECTION') {
+                clearOCRRegions();
+                console.log('[content] Selection requested.');
+                startSelection();
 
-                    startSelection();
+                return;
+            }
 
-                    return;
-                }
+            if (message.type === 'CLEAR_OCR') {
+                console.log('[content] clearing OCR');
+                clearOCRRegions();
 
-                if (
-                    message.type ===
-                    'SCREENSHOT_CAPTURED'
-                ) {
-                    const blob =
-                        await cropScreenshot(
-                            message.screenshot,
-                            message.selection,
-                            message.viewport.width,
-                            message.viewport.height,
-                        );
+                return;
+            }
 
-                    console.log(
-                        'Crop created:',
-                        blob.size,
-                        'bytes',
-                    );
+            if (message.type === 'SCREENSHOT_CAPTURED') {
+                const blob = await cropScreenshot(
+                    message.screenshot,
+                    message.selection,
+                    message.viewport.width,
+                    message.viewport.height,
+                );
 
-                    const result =
-                        await sendToOCR(blob);
+                console.log('Crop created:', blob.size, 'bytes');
 
-                    console.log(
-                        '[content] detected regions:',
-                        result.regions,
-                    );
+                const result = await sendToOCR(blob);
 
-                    showOCRRegions(
-                        result.regions,
-                        message.selection,
-                    );
-                }
-            },
-        );
+                console.log('[content] detected regions:', result.regions);
+
+                // showDetectedRegions(
+                //     result.regions,
+                //     message.selection,
+                // );
+
+                await showOCRRegions(result.regions, message.selection);
+            }
+        });
     },
 });

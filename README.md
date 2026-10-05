@@ -12,9 +12,17 @@ Ctrl/Cmd + Shift + O       |  Drag and let go to select region to translate
 ![select](/public/cropped1.png)  |  ![process](/public/cropped2.png)
 
 - `Ctrl/Cmd + Shift + X` erases the processed texts.
+- From here you can use Yomitan or other tools you have;
+
+![yomi](/public/yomi.png)
+
 - Other fonts are also available;
 
 ![shadow font](/public/cropped3.png)
+
+- These can be changed in the extension;
+
+![extension](/public/extension.png)
 
 ## Install
 

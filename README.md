@@ -32,7 +32,6 @@ Ctrl/Cmd + Shift + O       |  Select region
 ## Performance/Benchmarking
 - My understanding of machine learning and OCR models is still relatively limited, so some of my explanations or assumptions regarding model behaviour and performance may not be entirely accurate. Corrections and suggestions are welcome.
 - The pipeline requires running two fairly large ML models locally, Comic Text Detector is used for detecting the bounding boxes of the text in a page and Manga OCR is used to extract the text in the bounding boxes.
-- Note that my understanding of LLMs is still relatively limited so I may response some wrong things.
 - On a M4 macbook air, the main performance bottleneck lies in the detection using Manga OCR to extract characters out of the bounding boxes, an initial benchmark using the original model, on average, extracting bounding boxes take around 1.5s sec while extracting a single sentence takes around 0.1 sec, collectively for an average of 15 boxes per image for a page of manga, this adds up to be quite significant.
 - As such, text detection can be coupled with different OCR models which will be added in a future update, so far, Apple's Vision framework provides OCR detection with hardware acceleration, provides some performance improvements, a method for windows is still in the works.  
 

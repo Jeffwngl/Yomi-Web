@@ -36,6 +36,11 @@ export default defineContentScript({
 
                 const result = await sendToOCR(blob);
 
+                if (!result.valid) {
+                    alert(result.reason);
+                    return;
+                }
+
                 console.log('[content] detected regions:', result.regions);
 
                 // showDetectedRegions(

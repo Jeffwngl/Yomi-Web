@@ -9,6 +9,15 @@ from extractor import recognize_text
 # we convert the image to pil then to cv and we can use the original
 # pil image later.
 def detect_regions(image: Image.Image):
+    image_width, image_height = image.size
+
+    if (image_height < 100 or image_width < 100):
+        return {
+            "regions": [],
+            "reason": "Selected image size too small.",
+            "valid": False
+        }
+
     cv_image = pil_to_cv(image)
 
     # performance debug
@@ -24,11 +33,16 @@ def detect_regions(image: Image.Image):
             time.perf_counter() - start,
             "seconds",
         )
-        
-    image_width, image_height = image.size
     
     regions = []
 
+    if (len(blocks) == 0):
+        return {
+            "regions": [],
+            "reason": "No text blocks detected.",
+            "valid": False
+        }
+    
     # performance debug
     ocr_total = 0.0
 
@@ -70,4 +84,8 @@ def detect_regions(image: Image.Image):
         print("Manga OCR Total:", ocr_total, "seconds")
         print("Manga OCR Individual:", ocr_total / len(regions), "seconds")
 
-    return regions
+    return {
+        "regions": regions,
+        "reason": None,
+        "valid": True
+    }

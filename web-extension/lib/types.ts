@@ -1,4 +1,5 @@
 export interface OCRRegion {
+    text: string;
     x: number;
     y: number;
     width: number;

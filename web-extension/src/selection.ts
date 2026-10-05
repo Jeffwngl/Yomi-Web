@@ -25,7 +25,22 @@ export function startSelection() {
 
     let start: Point | null = null;
 
-    overlay.addEventListener('mousedown', event => {
+    // handle stop selection
+    const stopSelection = () => {
+        start = null;
+        overlay.remove();
+        document.removeEventListener('keydown', handleKeyDown);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+            stopSelection();
+        }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    overlay.addEventListener('mousedown', (event) => {
         start = {
             x: event.clientX,
             y: event.clientY,
@@ -34,7 +49,7 @@ export function startSelection() {
         selectionBox.style.display = 'block';
     });
 
-    overlay.addEventListener('mousemove', event => {
+    overlay.addEventListener('mousemove', (event) => {
         if (!start) {
             return;
         }
@@ -53,7 +68,7 @@ export function startSelection() {
         });
     });
 
-    overlay.addEventListener('mouseup', event => {
+    overlay.addEventListener('mouseup', (event) => {
         if (!start) {
             return;
         }
@@ -90,27 +105,17 @@ export async function cropScreenshot(
 
     await image.decode();
 
-    const scaleX =
-        image.naturalWidth / viewportWidth;
+    const scaleX = image.naturalWidth / viewportWidth;
+    const scaleY = image.naturalHeight / viewportHeight;
 
-    const scaleY =
-        image.naturalHeight / viewportHeight;
-
-    const canvas =
-        document.createElement('canvas');
-
-    canvas.width =
-        Math.round(selection.width * scaleX);
-
-    canvas.height =
-        Math.round(selection.height * scaleY);
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(selection.width * scaleX);
+    canvas.height = Math.round(selection.height * scaleY);
 
     const ctx = canvas.getContext('2d');
 
     if (!ctx) {
-        throw new Error(
-            'Unable to get 2D canvas context',
-        );
+        throw new Error('Unable to get 2D canvas context');
     }
 
     ctx.drawImage(
@@ -128,13 +133,9 @@ export async function cropScreenshot(
     );
 
     return new Promise((resolve, reject) => {
-        canvas.toBlob(blob => {
+        canvas.toBlob((blob) => {
             if (!blob) {
-                reject(
-                    new Error(
-                        'Failed to create crop',
-                    ),
-                );
+                reject(new Error('Failed to create crop'));
 
                 return;
             }

@@ -1,4 +1,5 @@
 from PIL import Image
+import time
 
 from detector import detect_text
 from image_utils import pil_to_cv
@@ -10,11 +11,26 @@ from extractor import recognize_text
 def detect_regions(image: Image.Image):
     cv_image = pil_to_cv(image)
 
+    # performance debug
+    if __debug__:
+        start = time.perf_counter()
+
     blocks = detect_text(cv_image)
-    
+
+    # performance debug
+    if __debug__:
+        print(
+            "Detection:",
+            time.perf_counter() - start,
+            "seconds",
+        )
+        
     image_width, image_height = image.size
     
     regions = []
+
+    # performance debug
+    ocr_total = 0.0
 
     for block in blocks:
         x1, y1, x2, y2 = block.xyxy
@@ -28,7 +44,16 @@ def detect_regions(image: Image.Image):
             )
         )
 
+        # performance debug
+        if __debug__:
+            start = time.perf_counter()
+
         text = recognize_text(crop).strip()
+
+        # performance debug
+        if __debug__:
+            ocr_total += time.perf_counter() - start
+
         if not text:
             continue
 
@@ -39,5 +64,10 @@ def detect_regions(image: Image.Image):
             "width": (x2 - x1) / image_width,
             "height": (y2 - y1) / image_height,
         })
+
+    # performance debug
+    if __debug__:
+        print("Manga OCR Total:", ocr_total, "seconds")
+        print("Manga OCR Individual:", ocr_total / len(regions), "seconds")
 
     return regions

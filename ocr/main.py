@@ -3,7 +3,8 @@ from io import BytesIO
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
-from manga_ocr import MangaOcr
+
+from pipeline import detect_regions
 
 app = FastAPI()
 
@@ -14,23 +15,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-mocr = MangaOcr()
-
 @app.post("/ocr")
 async def ocr(image: UploadFile = File(...)):
     data = await image.read()
+    pil_image = Image.open(BytesIO(data)).convert("RGB")
+    regions = detect_regions(pil_image)
 
-    pil_image = Image.open(
-        BytesIO(data)
-    )
-
-    text = mocr(pil_image)
-
-    print(
-        "OCR result:",
-        text
-    )
+    print("Detected blocks:",len(regions))
 
     return {
-        "text": text
-    }   
+        "regions": regions
+    }

@@ -8,6 +8,8 @@ export interface OCRRegion {
 
 export interface OCRResponse {
     regions: OCRRegion[];
+    reason: string;
+    valid: boolean;
 }
 
 export interface Point {

@@ -11,7 +11,7 @@ I mainly use this tool locally on my MacBook Air, so development has so far been
 
 ## Usage
 
-![usage](/public/usage.mov)
+![demo](public/demo.gif)
 
 Ctrl/Cmd + Shift + O       |  Select region
 :-------------------------:|:-------------------------:

@@ -1,6 +1,7 @@
 import { startSelection, cropScreenshot } from '@/src/selection';
 import { showDetectedRegions, showOCRRegions, clearOCRRegions } from '@/src/ui';
 import { sendToOCR } from '@/src/client';
+import { getCaptureMode } from '@/src/settings';
 
 export default defineContentScript({
     matches: ['<all_urls>'],
@@ -32,9 +33,11 @@ export default defineContentScript({
                     message.viewport.height,
                 );
 
+                const captureMode = await getCaptureMode();
+
                 console.log('Crop created:', blob.size, 'bytes');
 
-                const result = await sendToOCR(blob);
+                const result = await sendToOCR(blob, captureMode);
 
                 if (!result.valid) {
                     alert(result.reason);
@@ -43,10 +46,7 @@ export default defineContentScript({
 
                 console.log('[content] detected regions:', result.regions);
 
-                // showDetectedRegions(
-                //     result.regions,
-                //     message.selection,
-                // );
+                // showDetectedRegions(result.regions, message.selection);
 
                 await showOCRRegions(result.regions, message.selection);
             }

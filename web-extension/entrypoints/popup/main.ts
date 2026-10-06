@@ -1,13 +1,13 @@
 import './style.css';
-import {
-    getFontSize,
-    setFontSize,
-} from '@/src/settings';
+import { getFontSize, setFontSize } from '@/src/settings';
 
 import {
     getDisplayMode,
     setDisplayMode,
+    getCaptureMode,
+    setCaptureMode,
     type OCRDisplayMode,
+    type CaptureMode,
 } from '@/src/settings';
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
@@ -35,36 +35,47 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
             White text / black outline
         </option>
     </select>
-    <p>Use Crtl + shift + O to highlight text you want to process.</p>
+
+    <label for="capture-mode">
+        Capture mode
+    </label>
+    <select id="capture-mode">
+        <option value="page">
+            Whole page
+        </option>
+
+        <option value="textbox">
+            Single text box
+        </option>
+    </select>
+    <p>Use Cmd/Crtl + shift + O to highlight text you want to process.</p>
+    <p>Use Cmd/Crtl + shift + X to delete all text.</p>
   </div>
 `;
 
 // font size
-const slider =
-    document.querySelector<HTMLInputElement>(
-        '#font-size'
-    )!;
+const slider = document.querySelector<HTMLInputElement>('#font-size')!;
 
-slider.value =
-    String(await getFontSize());
+slider.value = String(await getFontSize());
 
 slider.addEventListener('input', async () => {
-    await setFontSize(
-        Number(slider.value)
-    );
+    await setFontSize(Number(slider.value));
 });
 
 // display mode
-const select =
-    document.querySelector<HTMLSelectElement>(
-        '#display-mode',
-    )!;
+const displaySelect = document.querySelector<HTMLSelectElement>('#display-mode')!;
 
-select.value =
-    await getDisplayMode();
+displaySelect.value = await getDisplayMode();
 
-select.addEventListener('change', async () => {
-    await setDisplayMode(
-        select.value as OCRDisplayMode,
-    );
+displaySelect.addEventListener('change', async () => {
+    await setDisplayMode(displaySelect.value as OCRDisplayMode);
+});
+
+// capture mode
+const captureSelect = document.querySelector<HTMLSelectElement>('#capture-mode')!;
+
+captureSelect.value = await getCaptureMode();
+
+captureSelect.addEventListener('change', async () => {
+    await setCaptureMode(captureSelect.value as CaptureMode);
 });

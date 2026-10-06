@@ -4,7 +4,7 @@ from pathlib import Path
 # to detect bounding boxes and regions where text
 # exist on the page, CTD is used.
 
-INPUT_SIZE = 1024
+INPUT_SIZE = 768
 
 ROOT = Path(__file__).resolve().parent
 
@@ -17,7 +17,7 @@ sys.path.insert(0, str(CTD_ROOT))
 from inference import TextDetector
 
 # load model
-MODEL_PATH = (ROOT / "models" / "comictextdetector.pt.onnx")
+MODEL_PATH = (ROOT / "models" / "comictextdetector_768.onnx")
 
 detector = TextDetector(
     model_path=str(MODEL_PATH),

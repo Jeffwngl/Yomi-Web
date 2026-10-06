@@ -11,6 +11,8 @@ I mainly use this tool locally on my MacBook Air, so development has so far been
 
 ## Usage
 
+![usage](/public/usage.mov)
+
 Ctrl/Cmd + Shift + O       |  Select region
 :-------------------------:|:-------------------------:
 ![select](/public/cropped1.png)  |  ![process](/public/cropped2.png)
@@ -38,7 +40,6 @@ You will need:
 ## Development
 1. Clone the repository
 ```
-Clone the repository
 git clone <repository-url>
 cd <repository-name>
 ```

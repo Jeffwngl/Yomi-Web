@@ -3,13 +3,16 @@ A web OCR tool to convert images to text.
 
 This project is a tool I developed around my own workflow for learning Japanese through manga. I primarily use Yomitan to look up unfamiliar words, build vocabulary, and support reading comprehension, one thing that I have found tedious when reading japanese manga specifically is the whole workflow of image to OCR to translation, prevously I had to use an OCR tool like textsniper to extract the text then paste it into the browser to use yomitan on it which was incredibly tedious, additionally, tools like this doesn't work well with several blocks of text so I had to translate text bubbles one by one. Thus, this project aims to bridge the process of image selection to extracted text in one easy to use extension.  
 
-I considered several existing tools, including Mokuro and YomiNinja. Both solve similar problems well, but they didn't quite fit the way I read manga (Mokuro uses local files and YomiNinja OCRs the whole screen). My workflow is focused primarily on reading directly from the web through websites like SJP, and I didn't like bothering with downloading manga. Because of this, I wanted something that could work directly into the browser and process the content I was already viewing in the browser as well as focus only on areas that I needed.
+I considered several existing tools, including Mokuro and YomiNinja. Both solve similar problems well, but they didn't quite fit the way I read manga (Mokuro uses local files which I didn't enjoy using and while YomiNinja covered most of my concerns, there were some minor features that I wish it had as well as the program in general being a bit too heavy for my workflow). My workflow is focused primarily on reading directly from the web through websites like SJP. Because of this, I wanted something that could work directly into the browser and process the content I was already viewing in the browser as well as focus only on areas that I needed.
 
 I mainly use this tool locally on my MacBook Air, so development has so far been focused around macOS and the Apple ecosystem. Some implementation decisions and platform-specific features may currently favour macOS, but the plan is to broaden the scope to windows and linux too.
 
 - NOTE THAT THIS PROJECT IS CURRENTLY STILL IN DEVELOPMENT.
 
 ## Usage
+
+- The text sits on a overlay layer above the webpage as html elements, you can easily use dictionaries such as [Yomitan](https://yomitan.wiki/) to look up words.
+- Yomi Web doesn't natively support dictionary integration, it only extracts text as DOM elements on the page, However, Yomitan has been tested to successfully work together with this.
 
 ![demo](public/demo.gif)
 

@@ -20,12 +20,78 @@ Ctrl/Cmd + Shift + O       |  Select region
 
 ![yomi](/public/yomi.png)
 
+## Requirements
+
+You will need:
+- Python 3.10–3.12
+- Node.js
+- npm
+- Chrome / Chromium or Firefox
+- Git
+
 ## Install
 
-- Check back later.
+- Three different types of models can be installed depending on the input size of the CTD OCR, for day-to-day use, the 768 model is recommended and is what this application comes with my default, see benchmarking below for more details.
+- To change the model input size, drag the desired model into your backend files under models and update the `detector.py` input size and model path parameters.
+- Currently a install is still in the works, Check back later,
 
+## Development
+1. Clone the repository
+```
+Clone the repository
+git clone <repository-url>
+cd <repository-name>
+```
+### Backend Setup
+2. Navigate to backend
+```
+cd ocr
+```
+3. Create a python venv
+- On macOS/Linux;
+```
+python3 -m venv .venv
+source .venv/bin/activate
+```
+- On windows;
+```
+python -m venv .venv
+.venv\Scripts\activate
+```
+4. Install python dependencies
+```
+pip install -r requirements.txt
+```
+- The backend primarily uses;
+```
+FastAPI
+Uvicorn
+Pillow
+Manga OCR
+NumPy
+OpenCV
+PyTorch
+TorchVision
+```
+5. Start the backend
+```
+uvicorn main:app --reload
+```
+- Note this may take a while in the first instance as Manga OCR will need to install 400MB of data.
+### Frontend Setup
+6. Navigate to frontend;
+```
+cd web-extension
+```
+7. Install dependencies and run dev mode;
+```
+npm install
+npm run dev
+```
+8. Add extension
+- On chrome, go to extensions, load unpacked and load the chrome-mv3-dev folder.
 ## Alternatives
-
+There are many alternatives that may better suit your use case, here are some that I have found.
 - Yomi Ninja
 - Mokuro
 
@@ -37,7 +103,7 @@ Ctrl/Cmd + Shift + O       |  Select region
 
 - Tweaking the input size parameter on the CTD model can be managed in `detector.py` (credit to [Comic Text Detector](https://github.com/dmMaze/comic-text-detector)). The original `onnx` file model uses a fixed input size of 1024, which produces the baseline performance shown above.
 - The `pytorch` model allows tweaking input size parameters but doesn't provide more reliable performance enhancements compared to the `onnx` version due to the pytorch runtime overhead.
-- To retain the performance benefits of ONNX while experimenting with different input resolutions, I also exported additional ONNX models with fixed input sizes of 768 and 640. These models can be selected from the extension menu.
+- To retain the performance benefits of ONNX while experimenting with different input resolutions, I also exported additional ONNX models with fixed input sizes of 768 and 640.
 
 Machine: Apple M4 (average across 6 pages)
 | Input Size | CTD time | MangaOCR time | Blocks |
@@ -54,6 +120,11 @@ Machine: Apple M4 (average across 6 pages)
 | CTD Input Size 768 | CTD Input Size 640 |
 :-------------------------:|:-------------------------:
 ![768](/public/768.png) | ![640](/public/640.png)
+
+## Future Updates
+
+- I would like to add the ability to tweak the text extraction OCR in the future, so far, it just uses Manga OCRS's fixed settings, I will also add the ability to choose between using Apple's Vision OCR as well.
+- I've heard that adding batch processing instead of individual passes is much better for ML models, I'll add this in a future update for text extraction.
 
 ## OCR Tools
 Manga OCR - [manga ocr](https://github.com/kha-white/manga-ocr)  

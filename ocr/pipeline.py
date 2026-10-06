@@ -85,7 +85,7 @@ def detect_regions(image: Image.Image, captureMode: CaptureMode):
     ocr_total = 0.0
 
     for block in blocks:
-        x1, y1, x2, y2 = block.xyxy
+        x1, y1, x2, y2 = block
         padding = 10
         crop = image.crop(
             (

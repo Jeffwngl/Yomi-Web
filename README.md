@@ -3,7 +3,9 @@ A web OCR tool to convert images to text.
 
 This project is a tool I developed around my own workflow for learning Japanese through manga. I primarily use Yomitan to look up unfamiliar words, build vocabulary, and support reading comprehension, one thing that I have found tedious when reading japanese manga specifically is the whole workflow of image to OCR to translation, prevously I had to use an OCR tool like textsniper to extract the text then paste it into the browser to use yomitan on it which was incredibly tedious, additionally, tools like this doesn't work well with several blocks of text so I had to translate text bubbles one by one. Thus, this project aims to bridge the process of image selection to extracted text in one easy to use extension.  
 
-I considered several existing tools, including Mokuro and YomiNinja. Both solve similar problems well, but they didn't quite fit the way I read manga (Mokuro uses local files which I didn't enjoy using and while YomiNinja covered most of my concerns, there were some minor features that I wish it had as well as the program in general being a bit too heavy for my workflow). My workflow is focused primarily on reading directly from the web through websites like SJP. Because of this, I wanted something that could work directly into the browser and process the content I was already viewing in the browser as well as focus only on areas that I needed.
+## Alternatives
+
+I considered several existing tools, including Mokuro and YomiNinja. Both solve similar problems well, but they didn't quite fit the way I read manga, Mokuro uses local files which I didn't enjoy using, My workflow is focused primarily on reading directly from the web through websites like SJP. Because of this, I wanted something that could work directly into the browser and process the content I was already viewing in the browser as well as focus only on areas that I needed. Yomi Ninja mostly covered all areas that I needed and in fact supports more features such as a variety of different OCR engines to choose from, however, it's purpose was more as a general purpose OCR, it's features are more targeted towards general use such as whole screen extraction and also required custom integration with Yomichan. Yomi Web is targetted mainly at the web browser, it's a lighter workflow for screenshotting and selecting regions between reading pages in a manga, if you want to look up a word or sentence, extracting the whole window is unecessary where the issue can be addressed by a simple one region OCR extraction. Yomitan or other tools also integrate seamlessly as it runs in the browser. In the future, since this is in the DOM, the OCR could be more tightly integrated with the DOM elements.  
 
 I mainly use this tool locally on my MacBook Air, so development has so far been focused around macOS and the Apple ecosystem. Some implementation decisions and platform-specific features may currently favour macOS, but the plan is to broaden the scope to windows and linux too.
 
@@ -94,10 +96,6 @@ npm run dev
 ```
 8. Add extension
 - On chrome, go to extensions, load unpacked and load the chrome-mv3-dev folder.
-## Alternatives
-There are many alternatives that may better suit your use case, here are some that I have found.
-- Yomi Ninja
-- Mokuro
 
 ## Performance/Benchmarking
 - My understanding of machine learning and OCR models is still relatively limited, so some of my explanations or assumptions regarding model behaviour and performance may not be entirely accurate. Corrections and suggestions are welcome.

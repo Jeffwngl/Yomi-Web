@@ -3,6 +3,8 @@ import type { OCRRegion, Selection } from '@/lib/types';
 import { getFontSize, getDisplayMode } from '@/src/settings';
 
 export function showDetectedRegions(regions: OCRRegion[], selection: Selection) {
+    console.log('Showing regions.');
+
     for (const region of regions) {
         const box = document.createElement('div');
 
@@ -45,7 +47,8 @@ export async function showOCRRegions(regions: OCRRegion[], selection: Selection)
 
             height: `${region.height * selection.height}px`,
 
-            zIndex: '2147483647',
+            // yomichan is z index 2147483647
+            zIndex: '2147483646',
             fontSize: `${fontSize}px`,
             overflow: 'visible',
             writingMode: 'vertical-rl',

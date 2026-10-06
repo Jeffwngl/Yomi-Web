@@ -1,3 +1,0 @@
-[submodule "ocr/vendor/vendor/comic-text-detector"]
-	path = ocr/vendor/vendor/comic-text-detector
-	url = https://github.com/dmMaze/comic-text-detector.git

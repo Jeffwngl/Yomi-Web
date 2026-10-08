@@ -48,8 +48,15 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
             Single text box
         </option>
     </select>
-    <p>Use Cmd/Crtl + shift + O to highlight text you want to process.</p>
-    <p>Use Cmd/Crtl + shift + X to delete all text.</p>
+
+    <label for="help">
+        Help
+    </label>
+    <div id="help">
+        <p>Use Cmd/Crtl + shift + O to highlight text you want to process.</p>
+        <p>Use Cmd/Crtl + shift + X to delete all text.</p>
+        <p>Use Cmd/Ctrl + shift + Y to reselect previous region</p>
+    </div>
   </div>
 `;
 

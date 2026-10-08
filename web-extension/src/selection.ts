@@ -108,7 +108,7 @@ export function reselectSelection() {
 }
 
 function captureSelection(selection: Selection) {
-    showPopupAnimated('Analyzing page.');
+    showPopupAnimated('Analyzing page...');
     browser.runtime.sendMessage({
         type: 'CAPTURE_SELECTION',
         selection,

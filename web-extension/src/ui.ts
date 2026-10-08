@@ -10,6 +10,14 @@ export function showDetectedRegions(regions: OCRRegion[], selection: Selection) 
         const box = document.createElement('div');
         box.classList.add('ocr-region');
 
+        // box.addEventListener('mouseenter', () => {
+        //     box.style.display = 'block';
+        // });
+
+        // box.addEventListener('mouseleave', () => {
+        //     box.style.display = 'none';
+        // });
+
         Object.assign(box.style, {
             position: 'fixed',
 
@@ -30,42 +38,87 @@ export function showDetectedRegions(regions: OCRRegion[], selection: Selection) 
     }
 }
 
+// export async function showOCRRegions(regions: OCRRegion[], selection: Selection) {
+//     const fontSize = await getFontSize();
+//     const displayMode = await getDisplayMode();
+
+//     for (const region of regions) {
+//         const text = document.createElement('div');
+//         text.classList.add('ocr-overlay');
+
+//         const regionWidth = region.width * selection.width;
+//         const regionHeight = region.height * selection.height;
+
+//         Object.assign(text.style, {
+//             position: 'fixed',
+
+//             left: `${selection.x + region.x * selection.width}px`,
+
+//             top: `${selection.y + region.y * selection.height}px`,
+
+//             // width: `${region.width * selection.width}px`,
+
+//             height: `${regionHeight}px`,
+
+//             // yomitan is z index 2147483647
+//             zIndex: BELOW_MAX_Z,
+//             fontSize: `${fontSize}px`,
+//             overflow: 'visible',
+//             writingMode: 'vertical-rl',
+//             textOrientation: 'upright',
+//             userSelect: 'text',
+//         });
+
+//         if (displayMode === 'boxed') {
+//             Object.assign(text.style, {
+//                 color: 'black',
+//                 background: 'white',
+//                 display: 'inline-block',
+//                 width: `${regionWidth}px`,
+//                 padding: '1px 2px',
+//                 textShadow: 'none',
+//             });
+//         }
+
+//         if (displayMode === 'outlined') {
+//             Object.assign(text.style, {
+//                 color: 'white',
+//                 background: 'transparent',
+//                 textShadow: `
+//                     -1px -1px 0 black,
+//                      1px -1px 0 black,
+//                     -1px  1px 0 black,
+//                      1px  1px 0 black
+//                 `,
+//             });
+//         }
+
+//         text.textContent = region.text;
+
+//         document.documentElement.appendChild(text);
+//     }
+//     showPopupAnimated('Finished analyzing.');
+// }
+
 export async function showOCRRegions(regions: OCRRegion[], selection: Selection) {
     const fontSize = await getFontSize();
     const displayMode = await getDisplayMode();
 
     for (const region of regions) {
+        const box = document.createElement('div');
+
         const text = document.createElement('div');
-        text.classList.add('ocr-overlay');
 
-        Object.assign(text.style, {
-            position: 'fixed',
-
-            left: `${selection.x + region.x * selection.width}px`,
-
-            top: `${selection.y + region.y * selection.height}px`,
-
-            // width: `${region.width * selection.width}px`,
-
-            height: `${region.height * selection.height}px`,
-
-            // yomichan is z index 2147483647
-            zIndex: BELOW_MAX_Z,
-            fontSize: `${fontSize}px`,
-            overflow: 'visible',
-            writingMode: 'vertical-rl',
-            textOrientation: 'upright',
-            userSelect: 'text',
-        });
+        createBox(selection, region, box);
+        createText(text, fontSize);
 
         if (displayMode === 'boxed') {
             Object.assign(text.style, {
                 color: 'black',
                 background: 'white',
-                display: 'inline-block',
-                width: 'max-content',
                 padding: '1px 2px',
                 textShadow: 'none',
+                boxSizing: 'border-box',
             });
         }
 
@@ -84,10 +137,53 @@ export async function showOCRRegions(regions: OCRRegion[], selection: Selection)
 
         text.textContent = region.text;
 
-        document.documentElement.appendChild(text);
+        box.addEventListener('mouseenter', () => {
+            text.style.display = 'block';
+        });
 
-        showPopupAnimated('Finished analyzing.');
+        box.addEventListener('mouseleave', () => {
+            text.style.display = 'none';
+        });
+
+        box.appendChild(text);
+        document.documentElement.appendChild(box);
     }
+
+    showPopupAnimated('Finished analyzing.');
+}
+
+function createBox(selection: Selection, region: OCRRegion, box: HTMLElement) {
+    box.classList.add('ocr-region');
+
+    const regionWidth = region.width * selection.width;
+    const regionHeight = region.height * selection.height;
+
+    Object.assign(box.style, {
+        position: 'fixed',
+        left: `${selection.x + region.x * selection.width}px`,
+        top: `${selection.y + region.y * selection.height}px`,
+        width: `${regionWidth}px`,
+        height: `${regionHeight}px`,
+
+        zIndex: BELOW_MAX_Z,
+        pointerEvents: 'auto',
+    });
+}
+
+async function createText(text: HTMLElement, fontSize: number) {
+    text.classList.add('ocr-overlay');
+
+    Object.assign(text.style, {
+        position: 'absolute',
+        inset: '0',
+
+        fontSize: `${fontSize}px`,
+        writingMode: 'vertical-rl',
+        textOrientation: 'upright',
+        userSelect: 'text',
+
+        display: 'none',
+    });
 }
 
 export function clearOCRRegions() {

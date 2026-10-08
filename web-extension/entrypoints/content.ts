@@ -54,7 +54,7 @@ export default defineContentScript({
 
                 console.log('[content] detected regions:', result.regions);
 
-                // showDetectedRegions(result.regions, message.selection);
+                showDetectedRegions(result.regions, message.selection);
 
                 await showOCRRegions(result.regions, message.selection);
             }

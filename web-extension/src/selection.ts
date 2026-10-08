@@ -1,12 +1,13 @@
 import type { Point, Selection } from '@/lib/types';
 import { BELOW_MAX_Z } from '@/lib/vals';
-import { showEscapeSelectionHelp, clearShowEscapeSelectionHelp } from './ui';
+import { showPopup, clearPopups, showPopupAnimated } from './ui';
 
 let cachedSelection: Selection | null = null;
 
 export function startSelection() {
     const overlay = document.createElement('div');
-    showEscapeSelectionHelp();
+    // showPopup('Press Esc to exit out of selection');
+    showPopupAnimated('Press Esc to exit out of selection');
 
     Object.assign(overlay.style, {
         position: 'fixed',
@@ -32,7 +33,7 @@ export function startSelection() {
 
     // handle stop selection
     const stopSelection = () => {
-        clearShowEscapeSelectionHelp();
+        //clearPopups();
         start = null;
         overlay.remove();
         document.removeEventListener('keydown', handleKeyDown);
@@ -74,9 +75,8 @@ export function startSelection() {
         });
     });
 
-    // offload this to captureSelection
     overlay.addEventListener('mouseup', (event) => {
-        clearShowEscapeSelectionHelp();
+        //clearPopups();
         if (!start) {
             return;
         }
@@ -108,6 +108,7 @@ export function reselectSelection() {
 }
 
 function captureSelection(selection: Selection) {
+    showPopupAnimated('Analyzing page.');
     browser.runtime.sendMessage({
         type: 'CAPTURE_SELECTION',
         selection,

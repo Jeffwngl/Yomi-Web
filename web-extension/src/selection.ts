@@ -1,14 +1,17 @@
 import type { Point, Selection } from '@/lib/types';
+import { BELOW_MAX_Z } from '@/lib/vals';
+import { showEscapeSelectionHelp, clearShowEscapeSelectionHelp } from './ui';
 
 export function startSelection() {
     const overlay = document.createElement('div');
+    showEscapeSelectionHelp();
 
     Object.assign(overlay.style, {
         position: 'fixed',
         inset: '0',
         background: 'rgba(0, 0, 0, 0.25)',
         cursor: 'crosshair',
-        zIndex: '2147483647',
+        zIndex: BELOW_MAX_Z,
     });
 
     const selectionBox = document.createElement('div');
@@ -27,6 +30,7 @@ export function startSelection() {
 
     // handle stop selection
     const stopSelection = () => {
+        clearShowEscapeSelectionHelp();
         start = null;
         overlay.remove();
         document.removeEventListener('keydown', handleKeyDown);
@@ -69,6 +73,7 @@ export function startSelection() {
     });
 
     overlay.addEventListener('mouseup', (event) => {
+        clearShowEscapeSelectionHelp();
         if (!start) {
             return;
         }

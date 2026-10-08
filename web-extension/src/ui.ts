@@ -1,5 +1,6 @@
+import background from '@/entrypoints/background';
 import type { OCRRegion, Selection } from '@/lib/types';
-
+import { MAX_Z, BELOW_MAX_Z } from '@/lib/vals';
 import { getFontSize, getDisplayMode } from '@/src/settings';
 
 export function showDetectedRegions(regions: OCRRegion[], selection: Selection) {
@@ -20,7 +21,7 @@ export function showDetectedRegions(regions: OCRRegion[], selection: Selection) 
             height: `${region.height * selection.height}px`,
 
             border: '2px solid red',
-            zIndex: '2147483647',
+            zIndex: MAX_Z,
             pointerEvents: 'none',
         });
 
@@ -48,7 +49,7 @@ export async function showOCRRegions(regions: OCRRegion[], selection: Selection)
             height: `${region.height * selection.height}px`,
 
             // yomichan is z index 2147483647
-            zIndex: '2147483646',
+            zIndex: BELOW_MAX_Z,
             fontSize: `${fontSize}px`,
             overflow: 'visible',
             writingMode: 'vertical-rl',
@@ -88,6 +89,34 @@ export async function showOCRRegions(regions: OCRRegion[], selection: Selection)
 
 export function clearOCRRegions() {
     const overlays = document.querySelectorAll('.ocr-overlay');
+
+    for (const overlay of overlays) {
+        overlay.remove();
+    }
+}
+
+export async function showEscapeSelectionHelp() {
+    const text = document.createElement('div');
+
+    text.classList.add('selection-help-overlay');
+
+    Object.assign(text.style, {
+        position: 'fixed',
+        background: 'white',
+        padding: '5px',
+        borderRadius: '3px',
+        top: '10px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: MAX_Z,
+    });
+
+    text.textContent = 'Press Esc to exit out of selection';
+    document.documentElement.appendChild(text);
+}
+
+export function clearShowEscapeSelectionHelp() {
+    const overlays = document.querySelectorAll('.selection-help-overlay');
 
     for (const overlay of overlays) {
         overlay.remove();

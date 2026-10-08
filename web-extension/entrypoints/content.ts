@@ -1,4 +1,4 @@
-import { startSelection, cropScreenshot } from '@/src/selection';
+import { startSelection, cropScreenshot, reselectSelection } from '@/src/selection';
 import { showDetectedRegions, showOCRRegions, clearOCRRegions } from '@/src/ui';
 import { sendToOCR } from '@/src/client';
 import { getCaptureMode } from '@/src/settings';
@@ -14,6 +14,14 @@ export default defineContentScript({
                 clearOCRRegions();
                 console.log('[content] Selection requested.');
                 startSelection();
+
+                return;
+            }
+
+            if (message.type === 'RESELECT_REGION') {
+                clearOCRRegions();
+                console.log('[content] Reselection requested.');
+                reselectSelection();
 
                 return;
             }
@@ -35,7 +43,7 @@ export default defineContentScript({
 
                 const captureMode = await getCaptureMode();
 
-                console.log('Crop created:', blob.size, 'bytes');
+                // console.log('Crop created:', blob.size, 'bytes');
 
                 const result = await sendToOCR(blob, captureMode);
 

@@ -15,6 +15,7 @@ export default defineBackground(() => {
         }
 
         if (command === 'start-ocr') {
+            console.log('[background] sending START_SELECTION');
             await browser.tabs.sendMessage(tab.id, {
                 type: 'START_SELECTION',
             });
@@ -26,6 +27,15 @@ export default defineBackground(() => {
             console.log('[background] sending CLEAR_OCR');
             await browser.tabs.sendMessage(tab.id, {
                 type: 'CLEAR_OCR',
+            });
+
+            return;
+        }
+
+        if (command === 'reselect-region') {
+            console.log('[background] sending RESELECT_REGION');
+            await browser.tabs.sendMessage(tab.id, {
+                type: 'RESELECT_REGION',
             });
 
             return;

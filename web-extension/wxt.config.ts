@@ -21,6 +21,13 @@ export default defineConfig({
                 },
                 description: 'Clear OCR overlays',
             },
+            'reselect-region': {
+                suggested_key: {
+                    default: 'Ctrl+Shift+Y',
+                    mac: 'Command+Shift+Y',
+                },
+                description: 'Reselect previously selected region',
+            },
         },
     },
 });

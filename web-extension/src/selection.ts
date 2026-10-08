@@ -2,6 +2,8 @@ import type { Point, Selection } from '@/lib/types';
 import { BELOW_MAX_Z } from '@/lib/vals';
 import { showEscapeSelectionHelp, clearShowEscapeSelectionHelp } from './ui';
 
+let cachedSelection: Selection | null = null;
+
 export function startSelection() {
     const overlay = document.createElement('div');
     showEscapeSelectionHelp();
@@ -72,6 +74,7 @@ export function startSelection() {
         });
     });
 
+    // offload this to captureSelection
     overlay.addEventListener('mouseup', (event) => {
         clearShowEscapeSelectionHelp();
         if (!start) {
@@ -85,16 +88,33 @@ export function startSelection() {
             height: Math.abs(event.clientY - start.y),
         };
 
-        browser.runtime.sendMessage({
-            type: 'CAPTURE_SELECTION',
-            selection,
-            viewport: {
-                width: window.innerWidth,
-                height: window.innerHeight,
-            },
-        });
+        cachedSelection = selection;
+
+        captureSelection(selection);
 
         overlay.remove();
+    });
+}
+
+export function reselectSelection() {
+    if (cachedSelection === null) {
+        console.log('No previously selected region.');
+        return;
+    }
+
+    // TODO: error handle this
+
+    captureSelection(cachedSelection);
+}
+
+function captureSelection(selection: Selection) {
+    browser.runtime.sendMessage({
+        type: 'CAPTURE_SELECTION',
+        selection,
+        viewport: {
+            width: window.innerWidth,
+            height: window.innerHeight,
+        },
     });
 }
 

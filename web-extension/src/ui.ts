@@ -3,6 +3,8 @@ import type { OCRRegion, Selection } from '@/lib/types';
 import { MAX_Z, BELOW_MAX_Z } from '@/lib/vals';
 import { getFontSize, getDisplayMode } from '@/src/settings';
 
+const REGION_PADDING = 3;
+
 export function showDetectedRegions(regions: OCRRegion[], selection: Selection) {
     console.log('Showing regions.');
 
@@ -10,95 +12,27 @@ export function showDetectedRegions(regions: OCRRegion[], selection: Selection) 
         const box = document.createElement('div');
         box.classList.add('ocr-region');
 
-        // box.addEventListener('mouseenter', () => {
-        //     box.style.display = 'block';
-        // });
-
-        // box.addEventListener('mouseleave', () => {
-        //     box.style.display = 'none';
-        // });
+        const padding = REGION_PADDING;
 
         Object.assign(box.style, {
             position: 'fixed',
 
-            left: `${selection.x + region.x * selection.width}px`,
+            left: `${selection.x + region.x * selection.width - padding}px`,
+            top: `${selection.y + region.y * selection.height - padding}px`,
 
-            top: `${selection.y + region.y * selection.height}px`,
-
-            width: `${region.width * selection.width}px`,
-
-            height: `${region.height * selection.height}px`,
+            width: `${region.width * selection.width + padding * 2}px`,
+            height: `${region.height * selection.height + padding * 2}px`,
 
             border: '2px solid red',
-            zIndex: MAX_Z,
+            borderRadius: '5px',
+            zIndex: BELOW_MAX_Z,
             pointerEvents: 'none',
+            boxSizing: 'border-box',
         });
 
         document.documentElement.appendChild(box);
     }
 }
-
-// export async function showOCRRegions(regions: OCRRegion[], selection: Selection) {
-//     const fontSize = await getFontSize();
-//     const displayMode = await getDisplayMode();
-
-//     for (const region of regions) {
-//         const text = document.createElement('div');
-//         text.classList.add('ocr-overlay');
-
-//         const regionWidth = region.width * selection.width;
-//         const regionHeight = region.height * selection.height;
-
-//         Object.assign(text.style, {
-//             position: 'fixed',
-
-//             left: `${selection.x + region.x * selection.width}px`,
-
-//             top: `${selection.y + region.y * selection.height}px`,
-
-//             // width: `${region.width * selection.width}px`,
-
-//             height: `${regionHeight}px`,
-
-//             // yomitan is z index 2147483647
-//             zIndex: BELOW_MAX_Z,
-//             fontSize: `${fontSize}px`,
-//             overflow: 'visible',
-//             writingMode: 'vertical-rl',
-//             textOrientation: 'upright',
-//             userSelect: 'text',
-//         });
-
-//         if (displayMode === 'boxed') {
-//             Object.assign(text.style, {
-//                 color: 'black',
-//                 background: 'white',
-//                 display: 'inline-block',
-//                 width: `${regionWidth}px`,
-//                 padding: '1px 2px',
-//                 textShadow: 'none',
-//             });
-//         }
-
-//         if (displayMode === 'outlined') {
-//             Object.assign(text.style, {
-//                 color: 'white',
-//                 background: 'transparent',
-//                 textShadow: `
-//                     -1px -1px 0 black,
-//                      1px -1px 0 black,
-//                     -1px  1px 0 black,
-//                      1px  1px 0 black
-//                 `,
-//             });
-//         }
-
-//         text.textContent = region.text;
-
-//         document.documentElement.appendChild(text);
-//     }
-//     showPopupAnimated('Finished analyzing.');
-// }
 
 export async function showOCRRegions(regions: OCRRegion[], selection: Selection) {
     const fontSize = await getFontSize();
@@ -119,6 +53,7 @@ export async function showOCRRegions(regions: OCRRegion[], selection: Selection)
                 padding: '1px 2px',
                 textShadow: 'none',
                 boxSizing: 'border-box',
+                borderRadius: '3px',
             });
         }
 
@@ -138,7 +73,7 @@ export async function showOCRRegions(regions: OCRRegion[], selection: Selection)
         text.textContent = region.text;
 
         box.addEventListener('mouseenter', () => {
-            text.style.display = 'block';
+            text.style.display = 'flex';
         });
 
         box.addEventListener('mouseleave', () => {
@@ -155,18 +90,23 @@ export async function showOCRRegions(regions: OCRRegion[], selection: Selection)
 function createBox(selection: Selection, region: OCRRegion, box: HTMLElement) {
     box.classList.add('ocr-region');
 
+    const padding = REGION_PADDING;
+
     const regionWidth = region.width * selection.width;
     const regionHeight = region.height * selection.height;
 
     Object.assign(box.style, {
         position: 'fixed',
-        left: `${selection.x + region.x * selection.width}px`,
-        top: `${selection.y + region.y * selection.height}px`,
-        width: `${regionWidth}px`,
-        height: `${regionHeight}px`,
 
-        zIndex: BELOW_MAX_Z,
+        left: `${selection.x + region.x * selection.width - padding}px`,
+        top: `${selection.y + region.y * selection.height - padding}px`,
+
+        width: `${regionWidth + padding * 2}px`,
+        height: `${regionHeight + padding * 2}px`,
+
+        zIndex: MAX_Z,
         pointerEvents: 'auto',
+        boxSizing: 'border-box',
     });
 }
 
@@ -175,14 +115,20 @@ async function createText(text: HTMLElement, fontSize: number) {
 
     Object.assign(text.style, {
         position: 'absolute',
-        inset: '0',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+
+        width: 'max-content',
+        height: 'max-content',
+
+        display: 'none',
 
         fontSize: `${fontSize}px`,
         writingMode: 'vertical-rl',
         textOrientation: 'upright',
-        userSelect: 'text',
-
-        display: 'none',
+        background: 'white',
+        padding: '2px',
     });
 }
 

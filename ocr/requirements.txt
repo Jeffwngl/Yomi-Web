@@ -3,7 +3,8 @@ uvicorn
 python-multipart
 pillow
 manga-ocr
+# manga-ocr-torchless
 numpy
-opencv-python
-torch
-torchvision
+opencv-python-headless
+# torch
+# torchvision

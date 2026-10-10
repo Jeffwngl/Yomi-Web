@@ -41,8 +41,6 @@ def detect_regions(image: Image.Image, captureMode: CaptureMode):
         }
 
     if (captureMode == CaptureMode.TEXTBOX):
-        text = recognize_text(image).strip()
-
         if (image_height > 1200 or image_width > 1200):
             return {
                 "regions": [],
@@ -50,6 +48,8 @@ def detect_regions(image: Image.Image, captureMode: CaptureMode):
                 "valid": False
             }
         
+        text = recognize_text(image).strip()
+
         if not text:
             return {
                 "regions": [],

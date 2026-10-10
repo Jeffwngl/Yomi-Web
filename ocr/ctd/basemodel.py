@@ -14,5 +14,5 @@ class TextDetBaseDNN:
     def __call__(self, im_in):
         blob = cv2.dnn.blobFromImage(im_in, scalefactor=1 / 255.0, size=self.input_size)
         self.model.setInput(blob)
-        blks, _, _  = self.model.forward(self.uoln)
-        return blks
+        blks, mask, lines_map = self.model.forward(self.uoln)
+        return blks, mask, lines_map

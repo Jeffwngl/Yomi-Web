@@ -6,3 +6,4 @@
 - As a result, this version does not provide the full functionality of the original Comic Text Detector repository and should not be treated as a drop-in replacement for it.
 - The detector is used only to locate text regions in manga images. OCR itself is handled separately by the OCR backend.
 - Some upstream dependencies have also been removed where they were only required by functionality that is no longer used.
+- yolov5_utils is rewritten using numpy to not have to install torch.

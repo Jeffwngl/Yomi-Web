@@ -1,4 +1,5 @@
 import './style.css';
+import { getOCRToken, setOCRToken } from '@/src/settings';
 import { getFontSize, setFontSize } from '@/src/settings';
 
 import {
@@ -12,6 +13,8 @@ import {
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
+    <label>Backend token <input id="ocr-token" type="password" autocomplete="off"></label>
+    <p>Copy the OCR token printed when the backend starts.</p>
     <label>
         OCR text size
         <input
@@ -85,4 +88,14 @@ captureSelect.value = await getCaptureMode();
 
 captureSelect.addEventListener('change', async () => {
     await setCaptureMode(captureSelect.value as CaptureMode);
+});
+
+const tokenInput = document.querySelector<HTMLInputElement>('#ocr-token')!;
+tokenInput.value = await getOCRToken();
+tokenInput.addEventListener('change', async () => {
+    try {
+        await setOCRToken(tokenInput.value);
+    } catch (error) {
+        console.error('Unable to save backend token:', error);
+    }
 });

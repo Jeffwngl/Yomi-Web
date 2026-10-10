@@ -54,3 +54,12 @@ export async function setCaptureMode(mode: CaptureMode): Promise<void> {
         captureMode: mode,
     });
 }
+
+export async function getOCRToken(): Promise<string> {
+    const result = await browser.storage.local.get('ocrToken');
+    return typeof result.ocrToken === 'string' ? result.ocrToken : '';
+}
+
+export async function setOCRToken(token: string): Promise<void> {
+    await browser.storage.local.set({ ocrToken: token.trim() });
+}

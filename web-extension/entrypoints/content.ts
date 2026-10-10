@@ -1,62 +1,103 @@
-import { startSelection, cropScreenshot, reselectSelection } from '@/src/selection';
-import { showDetectedRegions, showOCRRegions, clearOCRRegions } from '@/src/ui';
-import { sendToOCR } from '@/src/client';
+import { startSelection, cropScreenshot, reselectSelection, cancelSelection } from '@/src/selection';
+import { showDetectedRegions, showOCRRegions, clearOCRRegions, showPopupAnimated } from '@/src/ui';
+import { sendToOCR, cancelOCR } from '@/src/client';
 import { getCaptureMode } from '@/src/settings';
+import type { Selection } from '@/lib/types';
 
 export default defineContentScript({
     matches: ['<all_urls>'],
 
-    main() {
-        console.log('Extension loaded.');
+    main(ctx) {
+        let requestId: string | null = null;
 
-        browser.runtime.onMessage.addListener(async (message) => {
-            if (message.type === 'START_SELECTION') {
-                clearOCRRegions();
-                console.log('[content] Selection requested.');
-                startSelection();
-
-                return;
+        function invalidate() {
+            if (requestId) {
+                cancelOCR(requestId);
             }
+            requestId = null;
+            cancelSelection();
+            clearOCRRegions(false);
+        }
 
-            if (message.type === 'RESELECT_REGION') {
-                clearOCRRegions();
-                console.log('[content] Reselection requested.');
-                reselectSelection();
+        ctx.addEventListener(window, 'scroll', invalidate, { capture: true, passive: true });
+        ctx.addEventListener(window, 'resize', invalidate);
+        ctx.addEventListener(window, 'pagehide', invalidate);
+        ctx.addEventListener(document, 'visibilitychange', () => {
+            if (document.hidden) invalidate();
+        });
+        ctx.onInvalidated(invalidate);
 
-                return;
-            }
+        async function captureSelection(selection: Selection) {
+            invalidate();
+            const id = crypto.randomUUID();
+            requestId = id;
+            const viewport = { width: window.innerWidth, height: window.innerHeight };
+            void showPopupAnimated('Analyzing page...');
+            try {
+                // allow the removed selection overlay to leave the rendered screenshot.
+                await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
-            if (message.type === 'CLEAR_OCR') {
-                console.log('[content] clearing OCR');
-                clearOCRRegions();
-
-                return;
-            }
-
-            if (message.type === 'SCREENSHOT_CAPTURED') {
-                const blob = await cropScreenshot(
-                    message.screenshot,
-                    message.selection,
-                    message.viewport.width,
-                    message.viewport.height,
-                );
-
-                const captureMode = await getCaptureMode();
-
-                // console.log('Crop created:', blob.size, 'bytes');
-
-                const result = await sendToOCR(blob, captureMode);
-
-                if (!result.valid) {
-                    alert(result.reason);
+                if (requestId !== id) {
                     return;
                 }
 
-                console.log('[content] detected regions:', result.regions);
+                const capture = await browser.runtime.sendMessage({ type: 'CAPTURE_SELECTION' });
 
-                showDetectedRegions(result.regions, message.selection);
+                if (requestId !== id) {
+                    return;
+                }
 
-                await showOCRRegions(result.regions, message.selection);
+                if (!capture?.ok) {
+                    throw new Error(capture?.error || 'Screenshot capture failed.');
+                }
+
+                const blob = await cropScreenshot(capture.screenshot, selection, viewport.width, viewport.height);
+
+                const captureMode = await getCaptureMode();
+                if (requestId !== id) {
+                    return;
+                }
+
+                const result = await sendToOCR(blob, captureMode, id);
+
+                if (requestId !== id) return;
+
+                if (!result.valid) {
+                    void showPopupAnimated(result.reason || 'No text found.');
+                    return;
+                }
+
+                // settings reads are asynchronous, so rendering checks the operation again.
+                await showOCRRegions(result.regions, selection, () => requestId === id);
+
+                if (requestId === id) {
+                    showDetectedRegions(result.regions, selection);
+                }
+            } catch (error) {
+                if (requestId === id) {
+                    console.error('[content] OCR failed:', error);
+                    void showPopupAnimated(error instanceof Error ? error.message : 'OCR failed.', 5000);
+                }
+            }
+        }
+
+        browser.runtime.onMessage.addListener((message) => {
+            if (message.type === 'START_SELECTION') {
+                invalidate();
+
+                startSelection((selection) => {
+                    void captureSelection(selection);
+                });
+            } else if (message.type === 'RESELECT_REGION') {
+                invalidate();
+
+                reselectSelection((selection) => {
+                    void captureSelection(selection);
+                });
+            } else if (message.type === 'CLEAR_OCR') {
+                invalidate();
+
+                void showPopupAnimated('Cleared page.');
             }
         });
     },

@@ -1,4 +1,3 @@
-import background from '@/entrypoints/background';
 import type { OCRRegion, Selection } from '@/lib/types';
 import { MAX_Z, BELOW_MAX_Z } from '@/lib/vals';
 import { getFontSize, getDisplayMode } from '@/src/settings';
@@ -34,9 +33,10 @@ export function showDetectedRegions(regions: OCRRegion[], selection: Selection) 
     }
 }
 
-export async function showOCRRegions(regions: OCRRegion[], selection: Selection) {
+export async function showOCRRegions(regions: OCRRegion[], selection: Selection, isCurrent = () => true) {
     const fontSize = await getFontSize();
     const displayMode = await getDisplayMode();
+    if (!isCurrent()) return;
 
     for (const region of regions) {
         const box = document.createElement('div');
@@ -132,7 +132,7 @@ async function createText(text: HTMLElement, fontSize: number) {
     });
 }
 
-export function clearOCRRegions() {
+export function clearOCRRegions(showMessage = true) {
     const overlays = document.querySelectorAll('.ocr-overlay');
     const regions = document.querySelectorAll('.ocr-region');
 
@@ -144,7 +144,7 @@ export function clearOCRRegions() {
         region.remove();
     }
 
-    showPopupAnimated('Cleared page.');
+    if (showMessage) void showPopupAnimated('Cleared page.');
 }
 
 export async function showPopup(content: string) {

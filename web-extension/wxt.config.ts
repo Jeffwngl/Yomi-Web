@@ -5,7 +5,8 @@ export default defineConfig({
     manifest: {
         name: 'Yomi Web',
         description: 'An OCR tool to extract text from webpages.',
-        permissions: ['activeTab', 'storage'],
+        permissions: ['activeTab', 'storage', 'notifications'],
+        host_permissions: ['http://127.0.0.1:8000/*'],
         commands: {
             'start-ocr': {
                 suggested_key: {

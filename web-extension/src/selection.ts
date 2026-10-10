@@ -1,10 +1,18 @@
 import type { Point, Selection } from '@/lib/types';
 import { BELOW_MAX_Z } from '@/lib/vals';
-import { showPopup, clearPopups, showPopupAnimated } from './ui';
+import { showPopupAnimated } from './ui';
+
+type CaptureSelection = (selection: Selection) => void;
+let stopActiveSelection: (() => void) | null = null;
+
+export function cancelSelection() {
+    stopActiveSelection?.();
+}
 
 let cachedSelection: Selection | null = null;
 
-export function startSelection() {
+export function startSelection(captureSelection: CaptureSelection) {
+    cancelSelection();
     const overlay = document.createElement('div');
     // showPopup('Press Esc to exit out of selection');
     showPopupAnimated('Press Esc to exit out of selection');
@@ -14,6 +22,7 @@ export function startSelection() {
         inset: '0',
         background: 'rgba(0, 0, 0, 0.25)',
         cursor: 'crosshair',
+        touchAction: 'none',
         zIndex: BELOW_MAX_Z,
     });
 
@@ -37,6 +46,7 @@ export function startSelection() {
         start = null;
         overlay.remove();
         document.removeEventListener('keydown', handleKeyDown);
+        stopActiveSelection = null;
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -45,9 +55,12 @@ export function startSelection() {
         }
     };
 
+    stopActiveSelection = stopSelection;
     document.addEventListener('keydown', handleKeyDown);
 
-    overlay.addEventListener('mousedown', (event) => {
+    overlay.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0) return;
+        overlay.setPointerCapture(event.pointerId);
         start = {
             x: event.clientX,
             y: event.clientY,
@@ -56,7 +69,7 @@ export function startSelection() {
         selectionBox.style.display = 'block';
     });
 
-    overlay.addEventListener('mousemove', (event) => {
+    overlay.addEventListener('pointermove', (event) => {
         if (!start) {
             return;
         }
@@ -75,7 +88,7 @@ export function startSelection() {
         });
     });
 
-    overlay.addEventListener('mouseup', (event) => {
+    overlay.addEventListener('pointerup', (event) => {
         //clearPopups();
         if (!start) {
             return;
@@ -88,35 +101,33 @@ export function startSelection() {
             height: Math.abs(event.clientY - start.y),
         };
 
+        stopSelection();
+        if (selection.width < 4 || selection.height < 4) {
+            void showPopupAnimated('Select a larger region.');
+            return;
+        }
         cachedSelection = selection;
 
         captureSelection(selection);
-
-        overlay.remove();
     });
+    overlay.addEventListener('pointercancel', stopSelection);
 }
 
-export function reselectSelection() {
+export function reselectSelection(captureSelection: CaptureSelection) {
+    cancelSelection();
     if (cachedSelection === null) {
-        console.log('No previously selected region.');
+        void showPopupAnimated('No previously selected region.');
         return;
     }
-
-    // TODO: error handle this
-
-    captureSelection(cachedSelection);
-}
-
-function captureSelection(selection: Selection) {
-    showPopupAnimated('Analyzing page...');
-    browser.runtime.sendMessage({
-        type: 'CAPTURE_SELECTION',
-        selection,
-        viewport: {
-            width: window.innerWidth,
-            height: window.innerHeight,
-        },
-    });
+    const x = Math.max(0, Math.min(cachedSelection.x, window.innerWidth));
+    const y = Math.max(0, Math.min(cachedSelection.y, window.innerHeight));
+    const width = Math.min(cachedSelection.width, window.innerWidth - x);
+    const height = Math.min(cachedSelection.height, window.innerHeight - y);
+    if (width < 4 || height < 4) {
+        void showPopupAnimated('The previous region is outside this viewport. Select again.');
+        return;
+    }
+    captureSelection({ x, y, width, height });
 }
 
 export async function cropScreenshot(
@@ -125,6 +136,21 @@ export async function cropScreenshot(
     viewportWidth: number,
     viewportHeight: number,
 ): Promise<Blob> {
+    if (
+        ![selection.x, selection.y, selection.width, selection.height, viewportWidth, viewportHeight].every(
+            Number.isFinite,
+        ) ||
+        viewportWidth <= 0 ||
+        viewportHeight <= 0 ||
+        selection.width < 4 ||
+        selection.height < 4 ||
+        selection.x < 0 ||
+        selection.y < 0 ||
+        selection.x + selection.width > viewportWidth ||
+        selection.y + selection.height > viewportHeight
+    ) {
+        throw new Error('Invalid selection. Select a region inside the viewport.');
+    }
     const image = new Image();
 
     image.src = screenshot;
@@ -138,6 +164,9 @@ export async function cropScreenshot(
     canvas.width = Math.round(selection.width * scaleX);
     canvas.height = Math.round(selection.height * scaleY);
 
+    if (canvas.width * canvas.height > 16_000_000 || Math.max(canvas.width, canvas.height) > 8192) {
+        throw new Error('Selected image is too large. Select a smaller region.');
+    }
     const ctx = canvas.getContext('2d');
 
     if (!ctx) {

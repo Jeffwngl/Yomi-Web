@@ -8,7 +8,7 @@ export interface OCRRegion {
 
 export interface OCRResponse {
     regions: OCRRegion[];
-    reason: string;
+    reason: string | null;
     valid: boolean;
 }
 

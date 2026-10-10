@@ -1,11 +1,26 @@
-from PIL import Image
 import time
+from enum import Enum
+from PIL import Image
+from manga_ocr import MangaOcr
+import numpy as np
+import cv2
 
 from detector import detect_text
-from image_utils import pil_to_cv
-from extractor import recognize_text
 
-from enum import Enum
+# load the model once when the backend starts.
+mocr = MangaOcr()
+
+def recognize_text(image):
+    return mocr(image)
+
+# image utils
+def pil_to_cv(image):
+    arr = np.array(image.convert("RGB"))
+
+    return cv2.cvtColor(
+        arr,
+        cv2.COLOR_RGB2BGR,
+    )
 
 class CaptureMode(str, Enum):
     PAGE = "page"
@@ -62,7 +77,7 @@ def detect_regions(image: Image.Image, captureMode: CaptureMode):
     if __debug__:
         start = time.perf_counter()
 
-    blocks = detect_text(cv_image)
+    lines, classes, confidences = detect_text(cv_image)
 
     # performance debug
     if __debug__:
@@ -74,7 +89,7 @@ def detect_regions(image: Image.Image, captureMode: CaptureMode):
     
     regions = []
 
-    if (len(blocks) == 0):
+    if (len(lines) == 0):
         return {
             "regions": [],
             "reason": "No text blocks detected.",
@@ -84,8 +99,8 @@ def detect_regions(image: Image.Image, captureMode: CaptureMode):
     # performance debug
     ocr_total = 0.0
 
-    for block in blocks:
-        x1, y1, x2, y2 = block
+    for line in lines:
+        x1, y1, x2, y2 = line
         padding = 10
         crop = image.crop(
             (

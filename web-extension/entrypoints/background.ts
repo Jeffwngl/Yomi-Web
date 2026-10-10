@@ -10,12 +10,14 @@ export default defineBackground(() => {
     browser.tabs.onActivated.addListener(() => {
         tabVersion++;
     });
+
     browser.tabs.onUpdated.addListener((tabId, change) => {
         if (change.status === 'loading') {
             tabVersion++;
             requests.get(tabId)?.controller.abort();
         }
     });
+
     browser.tabs.onRemoved.addListener((tabId) => {
         requests.get(tabId)?.controller.abort();
         requests.delete(tabId);
@@ -30,7 +32,9 @@ export default defineBackground(() => {
         };
         try {
             const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-            if (tab?.id === undefined || !types[command]) return;
+            if (tab?.id === undefined || !types[command]) {
+                return;
+            }
             await browser.tabs.sendMessage(tab.id, { type: types[command] });
         } catch (error) {
             console.error('[background] command failed:', error);
@@ -96,7 +100,10 @@ export default defineBackground(() => {
                     throw new Error('The tab changed during capture. Try again.');
                 }
 
-                return { ok: true, screenshot };
+                return {
+                    ok: true,
+                    screenshot,
+                };
             }
 
             if (!['page', 'textbox'].includes(message.captureMode) || typeof message.requestId !== 'string') {
@@ -109,11 +116,16 @@ export default defineBackground(() => {
             ) {
                 throw new Error('Invalid or oversized image.');
             }
+
             const token = await getOCRToken();
 
-            if (!token) throw new Error('Enter the backend OCR token in the extension popup.');
+            if (!token) {
+                throw new Error('Enter the backend OCR token in the extension popup.');
+            }
 
-            if (canceled.get(tabId) === message.requestId) throw new Error('OCR canceled.');
+            if (canceled.get(tabId) === message.requestId) {
+                throw new Error('OCR canceled.');
+            }
 
             requests.get(tabId)?.controller.abort();
             const controller = new AbortController();
@@ -165,7 +177,10 @@ export default defineBackground(() => {
                     throw new Error('The backend returned an invalid OCR response.');
                 }
 
-                return { ok: true, result };
+                return {
+                    ok: true,
+                    result,
+                };
             } finally {
                 clearTimeout(timer);
 

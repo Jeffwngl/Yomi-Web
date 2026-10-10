@@ -1,4 +1,6 @@
-# Yomi Web
+# YAMOE
+*Yet Another Manga OCR Extension*  
+
 A **lightweight** web OCR tool to convert images to text, inspired by [Mokuro](https://github.com/kha-white/mokuro), [YomiNinja](https://github.com/matt-m-o/YomiNinja) and [Cloe](https://github.com/blueaxis/Cloe).
 
 ## About
